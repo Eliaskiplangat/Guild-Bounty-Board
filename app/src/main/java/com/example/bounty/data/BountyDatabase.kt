@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
+
 @Database(entities = [Bounty::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class BountyDatabase : RoomDatabase() {
@@ -17,10 +18,11 @@ abstract class BountyDatabase : RoomDatabase() {
 
         fun getInstance(context: Context): BountyDatabase =
             instance ?: synchronized(this) {
-                instance ?: Room.databaseBuilder(
-                    context.applicationContext,
-                    BountyDatabase::class.java,
-                    "bounty_board.db"
+                // Room 3's databaseBuilder takes a reified type param instead of ::class.java;
+                // on Android the factory lambda defaults to reflection, same as Room 2.x did.
+                instance ?: Room.databaseBuilder<BountyDatabase>(
+                    context = context.applicationContext,
+                    name = "bounty_board.db"
                 ).build().also { instance = it }
             }
     }
